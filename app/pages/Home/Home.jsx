@@ -1,5 +1,5 @@
 import { style } from "./HomeStyle";
-import { View } from "react-native";
+import { Alert, View } from "react-native";
 import { useState, useEffect } from "react";
 import {
   requestForegroundPermissionsAsync,
@@ -9,11 +9,14 @@ import { MeteoBasic } from "../../component/MeteoBasic/MeteoBasic.jsx";
 import { MeteoAdvanced } from "../../component/MeteoAdvanced/MeteoAdvanced.jsx";
 import { MeteoAPI } from "../../api/meteo";
 import { getWeatherIntepretation } from "../../services/meteo-services.js";
+import { useNavigation } from "@react-navigation/native";
+import Container from "../../component/Container/Container.jsx";
+import SearchBar from "../../component/SearchBar/SearchBar.jsx";
 
 export function Home() {
   const [coords, setCoords] = useState();
   const [weather, setWeather] = useState();
-  const [city, setCity] = useState();
+  const [city, setCity] = useState(city);
 
   const currentWeather = weather?.current_weather;
   useEffect(() => {
@@ -53,16 +56,34 @@ export function Home() {
     setCity(cityResponse);
   }
 
+  async function fetchCoordsByCity(city) {
+    try {
+      const coords = await MeteoAPI.fetchCoordsFromCity(city);
+      setCoords(coords);
+    } catch (e) {
+      Alert.alert(e);
+    }
+  }
+
+  const nav = useNavigation();
+
+  const NavigateToForecastPage = () => {
+    nav.navigate("Forecast", { city, ...weather.daily });
+  };
+
   return currentWeather ? (
-    <>
+    <Container>
       <View style={style.meteo_basic}>
         <MeteoBasic
           temperature={Math.round(currentWeather?.temperature)}
           city={city}
           interpretation={getWeatherIntepretation(currentWeather.weathercode)}
+          onPress={NavigateToForecastPage}
         />
       </View>
-      <View style={style.searchbar}></View>
+      <View style={style.searchbar}>
+        <SearchBar onSubmit={fetchCoordsByCity} />
+      </View>
       <View style={style.meteo_advanced}>
         <MeteoAdvanced
           wind={currentWeather.windspeed}
@@ -70,6 +91,6 @@ export function Home() {
           dawn={weather.daily.sunset[0].split("T")[1]}
         />
       </View>
-    </>
+    </Container>
   ) : null;
 }

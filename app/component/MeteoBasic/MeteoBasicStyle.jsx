@@ -7,6 +7,7 @@ export const MeteoBasicStyle = StyleSheet.create({
   label: {
     alignSelf: "flex-end",
     transform: [{ rotate: "-90deg" }],
+    padding: 20,
   },
   image: {
     height: 90,
@@ -18,6 +19,6 @@ export const MeteoBasicStyle = StyleSheet.create({
     justifyContent: "space-between",
   },
   temperature: {
-    fontSize: 150,
+    fontSize: 100,
   },
 });
